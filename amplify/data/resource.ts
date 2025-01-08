@@ -12,6 +12,21 @@ const schema = a.schema({
       content: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
+  BeerData: a
+    .model({
+      name: a.string().required(),
+      parentType: a.string(),
+      type: a.string(),
+      brand: a.string(),
+      origin: a.string(),
+      abv: a.float(), // Using float for ABV percentage
+      danger: a.string(), // Assuming this is a string rating
+      shown: a.string(), // Assuming this is a string rating
+      final: a.float(), // Assuming rating is a numeric value
+      dongerComments: a.string(),
+      shawooComments: a.string(),
+    })
+    .authorization((allow) => [allow.publicApiKey()]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
