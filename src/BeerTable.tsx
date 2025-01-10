@@ -13,8 +13,9 @@ import {
     Form,
     FormField,
     Input,
+    TableProps,
 } from '@cloudscape-design/components';
-import { columnDefinitions, getMatchesCountText, paginationLabels, collectionPreferencesProps, defaultPreferences } from './BeerTable-config';
+import { columnDefinitions, getMatchesCountText, paginationLabels, collectionPreferencesProps, defaultPreferences, BeerData } from './BeerTable-config';
 import { BeerRatingButtons } from './BeerRatingButtons';
 import { generateClient } from 'aws-amplify/api';
 import type { Schema } from "../amplify/data/resource";
@@ -54,14 +55,12 @@ export const BeerTable = () => {
         shawnComments: '',
     });
 
-    // console.log('beerData', beerData)
-
     const fetchBeers = async () => {
         try {
             const response = await client.models.BeerData.list();
-            console.log('response', response)
             const beerData = response.data
             const beers = beerData.map(beer => ({
+                id: beer.id,
                 name: beer.name || '',
                 parentType: beer.parentType || '',
                 type: beer.type || '',
@@ -98,8 +97,6 @@ export const BeerTable = () => {
                 dongerRating: newBeer.dongerRating || null,
                 shawnRating: newBeer.shawnRating || null,
                 overallRating: newBeer.overallRating || null,
-                dongerComments: newBeer.dongerComments || '',
-                shawnComments: newBeer.shawnComments || '',
             };
 
             // @ts-ignore
@@ -142,6 +139,45 @@ export const BeerTable = () => {
         setCurrentView('all');
     };
 
+    const handleSubmit = async(
+        currentItem: BeerData,
+        column: TableProps.ColumnDefinition<BeerData>,
+        value: unknown
+    ) => {
+        if (!column.id) {
+            return;
+        }
+    
+        if (column.id === 'dongerComments' || column.id === 'shawnComments') {
+            try {
+                // Prepare the input for the update operation
+                const updateInput = {
+                    id: currentItem.id,
+                    [column.id]: value as string  // dynamically set the field name based on column.id
+                };
+    
+                // Update in the backend
+                // @ts-ignore
+                await client.models.BeerData.update(updateInput);
+    
+                // Create the updated beer data
+                const updatedBeerData = beerData.map(beer => {
+                    if (beer.id === currentItem.id) {
+                        return { ...beer, [column.id]: value as string };
+                    }
+                    return beer;
+                });
+    
+                // Update both states with the new data
+                setBeerData(updatedBeerData);
+                setDisplayData(updatedBeerData);
+            } catch (error) {
+                console.error('Error updating beer data:', error);
+                // You might want to add error handling here, such as showing a toast notification
+            }
+        }
+    }
+
     const [preferences, setPreferences] = useState(defaultPreferences);
     const { items, actions, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(
         displayData,
@@ -178,7 +214,9 @@ export const BeerTable = () => {
                             <SpaceBetween direction="horizontal" size="xs">
                                 <BeerRatingButtons
                                     // @ts-ignore
-                                    onRating={() => getTopBeers('rating')}
+                                    onOverallRating={() => getTopBeers('overallRating')}
+                                    onBrandonRating={() => getTopBeers('dongerRating')}
+                                    onSeanRating={() => getTopBeers('shawnRating')}
                                     onResetBeers={resetToAllBeers}
                                     currentView={currentView}
                                 />
@@ -190,6 +228,7 @@ export const BeerTable = () => {
                     </Header>
                 }
                 columnDefinitions={columnDefinitions}
+                submitEdit={handleSubmit}
                 columnDisplay={preferences.contentDisplay}
                 items={items}
                 pagination={<Pagination {...paginationProps} ariaLabels={paginationLabels} />}

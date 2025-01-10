@@ -2,31 +2,31 @@ import React from 'react';
 import { Button, SpaceBetween } from '@cloudscape-design/components';
 
 export function BeerRatingButtons({ 
-    onFinalRating, 
-    onDngrRating, 
-    onShwnRating, 
+    onOverallRating,    
+    onBrandonRating,
+    onSeanRating,
     onResetBeers, 
     currentView 
 }) {
     return (
         <SpaceBetween direction="horizontal" size="xs">
             <Button 
-                variant={currentView === 'final' ? 'primary' : 'normal'}
-                onClick={onFinalRating}
+                variant={currentView === 'overallRating' ? 'primary' : 'normal'}
+                onClick={onOverallRating}
             >
                 Overall Top 10
             </Button>
             <Button 
-                variant={currentView === 'danger' ? 'primary' : 'normal'}
-                onClick={onDngrRating}
+                variant={currentView === 'dongerRating' ? 'primary' : 'normal'}
+                onClick={onBrandonRating}
             >
-                DONGER Top 10
+                Brandon Top 10
             </Button>
             <Button 
-                variant={currentView === 'shown' ? 'primary' : 'normal'}
-                onClick={onShwnRating}
+                variant={currentView === 'shawnRating' ? 'primary' : 'normal'}
+                onClick={onSeanRating}
             >
-                SHAWOOBOO Top 10
+                Sean Top 10
             </Button>
             <Button 
                 variant={currentView === 'all' ? 'primary' : 'normal'}

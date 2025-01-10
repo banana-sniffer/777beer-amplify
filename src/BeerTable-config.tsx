@@ -1,3 +1,22 @@
+import { Input } from '@cloudscape-design/components';
+
+
+// Define the Beer interface
+export interface BeerData {
+    id: string;
+    name: string;
+    parentType: string;
+    type: string;
+    brand: string;
+    origin: string;
+    abv: number;
+    dongerRating: number;
+    shawnRating: number;
+    overallRating: number;
+    dongerComments: string;
+    shawnComments: string;
+}
+
 export function getMatchesCountText(count) {
     return count === 1 ? `1 match` : `${count} matches`;
 }
@@ -9,7 +28,7 @@ function createLabelFunction(columnName) {
     };
 }
 
-export const columnDefinitions = [
+export const baseColumnDefinitions = [
     {
         id: 'name',
         header: 'Name',
@@ -56,7 +75,7 @@ export const columnDefinitions = [
     { 
         id: 'dongerRating',
         header: 'Brandon Rating', 
-        cell: (item) => item.danger,
+        cell: (item) => item.dongerRating,
         ariaLabel: createLabelFunction('dongerRating'),
         sortingField: 'dongerRating'
     },
@@ -87,6 +106,64 @@ export const columnDefinitions = [
         sortingField: 'shawnComments'
     },
 ]
+
+const editableColumns = {
+    dongerComments: {
+        minWidth: 200,
+        editConfig: {
+            ariaLabel: 'Edit Brandon Comments',
+            errorIconAriaLabel: 'Comment Validation Error',
+            editIconAriaLabel: 'editable',
+            editingCell: (item, { setValue, currentValue }) => {
+                return (
+                    <Input
+                        autoFocus={true}
+                        ariaLabel="Edit Brandon comments"
+                        value={currentValue ?? item.dongerComments}
+                        onChange={event => {
+                            setValue(event.detail.value);
+                        }}
+                        placeholder="Enter comments"
+                    />
+                );
+            },
+        },
+        cell: item => item.dongerComments,
+    },
+    shawnComments: {
+        minWidth: 200,
+        editConfig: {
+            ariaLabel: 'Edit Sean comments',
+            errorIconAriaLabel: 'Comment Validation Error',
+            editIconAriaLabel: 'editable',
+            editingCell: (item, { setValue, currentValue }) => {
+                return (
+                    <Input
+                        autoFocus={true}
+                        ariaLabel="Edit Sean comments"
+                        value={currentValue ?? item.shawnComments}
+                        onChange={event => {
+                            setValue(event.detail.value);
+                        }}
+                        placeholder="Enter comments"
+                    />
+                );
+            },
+        },
+        cell: item => item.shawnComments,
+    },
+};
+
+export const columnDefinitions = baseColumnDefinitions.map(column => {
+    if (editableColumns[column.id]) {
+        return {
+            ...column,
+            // minWidth: Math.max(Number(column.minWidth) || 0, 176),
+            ...editableColumns[column.id],
+        };
+    }
+    return column;
+});
 
 export const defaultPreferences = {
     pageSize: 20,
