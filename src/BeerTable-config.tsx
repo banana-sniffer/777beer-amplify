@@ -1,6 +1,5 @@
 import { Input } from '@cloudscape-design/components';
 
-
 // Define the Beer interface
 export interface BeerData {
     id: string;
@@ -40,7 +39,7 @@ export const baseColumnDefinitions = [
     { 
         id: 'parentType',
         header: 'Parent Type', 
-        cell: (item) => item.type,
+        cell: (item) => item.parentType,
         ariaLabel: createLabelFunction('Parent Type'),
         sortingField: 'parentType'
     },
@@ -88,7 +87,7 @@ export const baseColumnDefinitions = [
     },
     { 
         id: 'overallRating',
-        header: 'Rating', 
+        header: 'Overall Rating', 
         cell: (item) => item.overallRating,
         ariaLabel: createLabelFunction('overallRating'),
         sortingField: 'overallRating'
@@ -108,6 +107,163 @@ export const baseColumnDefinitions = [
 ]
 
 const editableColumns = {
+    parentType: {
+        minWidth: 200,
+        editConfig: {
+            ariaLabel: 'Edit Parent Type',
+            errorIconAriaLabel: 'Validation Error',
+            editIconAriaLabel: 'editable',
+            editingCell: (item, { setValue, currentValue }) => {
+                return (
+                    <Input
+                        autoFocus={true}
+                        ariaLabel="Edit Parent Type"
+                        value={currentValue ?? item.parentType}
+                        onChange={event => {
+                            setValue(event.detail.value);
+                        }}
+                        placeholder="Enter parent type"
+                    />
+                );
+            },
+        },
+        cell: item => item.parentType,
+    },
+    type: {
+        minWidth: 200,
+        editConfig: {
+            ariaLabel: 'Edit Type',
+            errorIconAriaLabel: 'Validation Error',
+            editIconAriaLabel: 'editable',
+            editingCell: (item, { setValue, currentValue }) => {
+                return (
+                    <Input
+                        autoFocus={true}
+                        ariaLabel="Edit Type"
+                        value={currentValue ?? item.type}
+                        onChange={event => {
+                            setValue(event.detail.value);
+                        }}
+                        placeholder="Enter type"
+                    />
+                );
+            },
+        },
+        cell: item => item.type,
+    },
+    brand: {
+        minWidth: 200,
+        editConfig: {
+            ariaLabel: 'Edit Brand',
+            errorIconAriaLabel: 'Validation Error',
+            editIconAriaLabel: 'editable',
+            editingCell: (item, { setValue, currentValue }) => {
+                return (
+                    <Input
+                        autoFocus={true}
+                        ariaLabel="Edit Brand"
+                        value={currentValue ?? item.brand}
+                        onChange={event => {
+                            setValue(event.detail.value);
+                        }}
+                        placeholder="Enter brand"
+                    />
+                );
+            },
+        },
+        cell: item => item.brand,
+    },
+    origin: {
+        minWidth: 200,
+        editConfig: {
+            ariaLabel: 'Edit Origin',
+            errorIconAriaLabel: 'Validation Error',
+            editIconAriaLabel: 'editable',
+            editingCell: (item, { setValue, currentValue }) => {
+                return (
+                    <Input
+                        autoFocus={true}
+                        ariaLabel="Edit Origin"
+                        value={currentValue ?? item.origin}
+                        onChange={event => {
+                            setValue(event.detail.value);
+                        }}
+                        placeholder="Enter origin"
+                    />
+                );
+            },
+        },
+        cell: item => item.origin,
+    },
+    abv: {
+        minWidth: 100,
+        editConfig: {
+            ariaLabel: 'Edit ABV',
+            errorIconAriaLabel: 'Validation Error',
+            editIconAriaLabel: 'editable',
+            editingCell: (item, { setValue, currentValue }) => {
+                return (
+                    <Input
+                        autoFocus={true}
+                        type="number"
+                        ariaLabel="Edit ABV"
+                        value={currentValue ?? item.abv}
+                        onChange={event => {
+                            setValue(parseFloat(event.detail.value) || 0);
+                        }}
+                        placeholder="Enter ABV"
+                    />
+                );
+            },
+        },
+        cell: item => item.abv,
+    },
+    dongerRating: {
+        minWidth: 100,
+        editConfig: {
+            ariaLabel: 'Edit Brandon Rating',
+            errorIconAriaLabel: 'Rating Validation Error',
+            editIconAriaLabel: 'editable',
+            editingCell: (item, { setValue, currentValue }) => {
+                return (
+                    <Input
+                        autoFocus={true}
+                        type="number"
+                        ariaLabel="Edit Brandon rating"
+                        value={currentValue ?? item.dongerRating}
+                        onChange={event => {
+                            setValue(parseFloat(event.detail.value) || 0);
+                        }}
+                        placeholder="Enter rating"
+                    />
+                );
+            },
+        },
+        cell: item => item.dongerRating,
+    },
+    shawnRating: {
+        minWidth: 100,
+        editConfig: {
+            ariaLabel: 'Edit Sean Rating',
+            errorIconAriaLabel: 'Rating Validation Error',
+            editIconAriaLabel: 'editable',
+            editingCell: (item, { setValue, currentValue }) => {
+                return (
+                    <Input
+                        autoFocus={true}
+                        type="number"
+                        ariaLabel="Edit Sean rating"
+                        value={currentValue ?? item.shawnRating}
+                        onChange={event => {
+                            setValue(parseFloat(event.detail.value) || 0);
+                        }}
+                        placeholder="Enter rating"
+                    />
+                );
+            },
+        },
+        cell: item => item.shawnRating,
+    },
     dongerComments: {
         minWidth: 200,
         editConfig: {
@@ -133,7 +289,7 @@ const editableColumns = {
     shawnComments: {
         minWidth: 200,
         editConfig: {
-            ariaLabel: 'Edit Sean comments',
+            ariaLabel: 'Edit Sean Comments',
             errorIconAriaLabel: 'Comment Validation Error',
             editIconAriaLabel: 'editable',
             editingCell: (item, { setValue, currentValue }) => {
@@ -158,12 +314,12 @@ export const columnDefinitions = baseColumnDefinitions.map(column => {
     if (editableColumns[column.id]) {
         return {
             ...column,
-            // minWidth: Math.max(Number(column.minWidth) || 0, 176),
             ...editableColumns[column.id],
         };
     }
     return column;
 });
+
 
 export const defaultPreferences = {
     pageSize: 20,

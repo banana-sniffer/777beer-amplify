@@ -19,6 +19,7 @@ import { columnDefinitions, getMatchesCountText, paginationLabels, collectionPre
 import { BeerRatingButtons } from './BeerRatingButtons';
 import { generateClient } from 'aws-amplify/api';
 import type { Schema } from "../amplify/data/resource";
+import { useAuthenticator } from '@aws-amplify/ui-react';
 
 const client = generateClient<Schema>();
 
@@ -48,12 +49,8 @@ export const BeerTable = () => {
         brand: '',
         origin: '',
         abv: '',
-        dongerRating: '',
-        shawnRating: '',
-        overallRating: '',
-        dongerComments: '',
-        shawnComments: '',
     });
+    const { user, signOut } = useAuthenticator();
 
     const fetchBeers = async () => {
         try {
@@ -87,6 +84,11 @@ export const BeerTable = () => {
     // Function to add a new beer
     const addNewBeer = async () => {
         try {
+            if (!newBeer.name.trim()) {
+                alert('The beer name is required.');
+                return;
+            }
+
             const beerInput = {
                 name: newBeer.name || '',
                 parentType: newBeer.parentType || '',
@@ -94,9 +96,6 @@ export const BeerTable = () => {
                 brand: newBeer.brand || '',
                 origin: newBeer.origin || '',
                 abv: newBeer.abv || null,
-                dongerRating: newBeer.dongerRating || null,
-                shawnRating: newBeer.shawnRating || null,
-                overallRating: newBeer.overallRating || null,
             };
 
             // @ts-ignore
@@ -112,11 +111,6 @@ export const BeerTable = () => {
                 brand: '',
                 origin: '',
                 abv: '',
-                dongerRating: '',
-                shawnRating: '',
-                overallRating: '',
-                dongerComments: '',
-                shawnComments: '',
             });
         } catch (error) {
             console.error('Error adding beer:', error);
@@ -139,7 +133,7 @@ export const BeerTable = () => {
         setCurrentView('all');
     };
 
-    const handleSubmit = async(
+    const handleSubmit = async (
         currentItem: BeerData,
         column: TableProps.ColumnDefinition<BeerData>,
         value: unknown
@@ -148,35 +142,69 @@ export const BeerTable = () => {
             return;
         }
     
-        if (column.id === 'dongerComments' || column.id === 'shawnComments') {
-            try {
-                // Prepare the input for the update operation
-                const updateInput = {
-                    id: currentItem.id,
-                    [column.id]: value as string  // dynamically set the field name based on column.id
-                };
+        try {
+            // Prepare the input for the update operation
+            const updateInput: Partial<BeerData> = {
+                id: currentItem.id,
+                [column.id]: column.id.includes('Rating') || column.id === 'abv'
+                    ? Number(value) // Ensure numeric fields are numbers
+                    : value as string, // Assume other fields are strings
+            };
     
-                // Update in the backend
-                // @ts-ignore
-                await client.models.BeerData.update(updateInput);
+            if (column.id.includes('Rating') || column.id === 'abv') {
+                let numericValue = updateInput[column.id] as number;
     
-                // Create the updated beer data
-                const updatedBeerData = beerData.map(beer => {
-                    if (beer.id === currentItem.id) {
-                        return { ...beer, [column.id]: value as string };
-                    }
-                    return beer;
-                });
+                if (isNaN(numericValue)) {
+                    console.error('Invalid numeric value:', value);
+                    return; // Early exit if the value is not a valid number
+                }
     
-                // Update both states with the new data
-                setBeerData(updatedBeerData);
-                setDisplayData(updatedBeerData);
-            } catch (error) {
-                console.error('Error updating beer data:', error);
-                // You might want to add error handling here, such as showing a toast notification
+                // Validate and truncate numeric fields
+                const lowerBound = column.id === 'abv' ? 0 : 0;
+                const upperBound = column.id === 'abv' ? 100 : 10;
+    
+                if (numericValue < lowerBound || numericValue > upperBound) {
+                    console.error(
+                        `${column.id} value out of bounds (must be between ${lowerBound} and ${upperBound}):`,
+                        value
+                    );
+                    return; // Early exit if the value is outside the allowed range
+                }
+    
+                numericValue = parseFloat(numericValue.toFixed(1)); // Truncate to one decimal place
+                updateInput[column.id] = numericValue;
             }
+    
+            // Update in the backend
+            // @ts-ignore
+            await client.models.BeerData.update(updateInput);
+    
+            // Create the updated beer data
+            const updatedBeerData = beerData.map(beer => {
+                if (beer.id === currentItem.id) {
+                    const updatedBeer = { ...beer, [column.id]: updateInput[column.id] };
+    
+                    // Calculate overallRating if both ratings are present
+                    if (updatedBeer.dongerRating != null && updatedBeer.shawnRating != null) {
+                        updatedBeer.overallRating = 
+                            parseFloat(((updatedBeer.dongerRating + updatedBeer.shawnRating) / 2).toFixed(1));
+                    }
+    
+                    return updatedBeer;
+                }
+                return beer;
+            });
+    
+            // Update both states with the new data
+            setBeerData(updatedBeerData);
+            setDisplayData(updatedBeerData);
+        } catch (error) {
+            console.error('Error updating beer data:', error);
+            // Optional: Add error handling such as showing a toast notification
         }
-    }
+    };    
+    
+    
 
     const [preferences, setPreferences] = useState(defaultPreferences);
     const { items, actions, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(
@@ -205,8 +233,16 @@ export const BeerTable = () => {
 
     return (
         <>
+            <Button
+                    size="sm"
+                    onClick={signOut}
+                    className="absolute top-4 right-4 flex items-center gap-2"
+                >
+                    Sign out
+                </Button>
             <Table
                 {...collectionProps}
+                wrapLines
                 header={
                     <Header
                         counter={`(${items.length})`}
