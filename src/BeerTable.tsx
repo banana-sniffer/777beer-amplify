@@ -54,7 +54,9 @@ export const BeerTable = () => {
 
     const fetchBeers = async () => {
         try {
-            const response = await client.models.BeerData.list();
+            const response = await client.models.BeerData.list({
+                limit: 100
+            });
             const beerData = response.data
             const beers = beerData.map(beer => ({
                 id: beer.id,
@@ -187,7 +189,7 @@ export const BeerTable = () => {
                     // Calculate overallRating if both ratings are present
                     if (updatedBeer.dongerRating != null && updatedBeer.shawnRating != null) {
                         updatedBeer.overallRating = 
-                            parseFloat(((updatedBeer.dongerRating + updatedBeer.shawnRating) / 2).toFixed(1));
+                            parseFloat(((updatedBeer.dongerRating + updatedBeer.shawnRating) / 2).toFixed(2));
                     }
     
                     return updatedBeer;
