@@ -234,9 +234,7 @@ export const BeerTable = () => {
     return (
         <>
             <Button
-                    size="sm"
                     onClick={signOut}
-                    className="absolute top-4 right-4 flex items-center gap-2"
                 >
                     Sign out
                 </Button>
