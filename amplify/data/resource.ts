@@ -20,6 +20,8 @@ const schema = a.schema({
       overallRating: a.float(), // Assuming rating is a numeric value
       dongerComments: a.string(),
       shawnComments: a.string(),
+      willsChoice: a.boolean(),
+      willsComments: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 });

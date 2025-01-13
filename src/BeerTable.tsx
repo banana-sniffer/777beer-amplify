@@ -20,6 +20,7 @@ import { BeerRatingButtons } from './BeerRatingButtons';
 import { generateClient } from 'aws-amplify/api';
 import type { Schema } from "../amplify/data/resource";
 import { useAuthenticator } from '@aws-amplify/ui-react';
+import { BRANDON_ID, SEAN_ID, WILL_ID } from './Constants';
 
 const client = generateClient<Schema>();
 
@@ -53,29 +54,46 @@ export const BeerTable = () => {
     const { user, signOut } = useAuthenticator();
 
     const fetchBeers = async () => {
+        const allBeers = [];
+        let nextToken = null;
+      
         try {
+          do {
             const response = await client.models.BeerData.list({
-                limit: 100
+              limit: 100,
+              nextToken,
             });
-            const beerData = response.data
-            const beers = beerData.map(beer => ({
-                id: beer.id,
-                name: beer.name || '',
-                parentType: beer.parentType || '',
-                type: beer.type || '',
-                brand: beer.brand || '',
-                origin: beer.origin || '',
-                abv: beer.abv || '',
-                dongerRating: beer.dongerRating || '',
-                shawnRating: beer.shawnRating || '',
-                overallRating: beer.overallRating || '',
-                dongerComments: beer.dongerComments || '',
-                shawnComments: beer.shawnComments || '',
+      
+            const beerData = response.data;
+      
+            const beers = beerData.map((beer) => ({
+              id: beer.id,
+              createdAt: beer.createdAt || '',
+              name: beer.name || '',
+              parentType: beer.parentType || '',
+              type: beer.type || '',
+              brand: beer.brand || '',
+              origin: beer.origin || '',
+              abv: beer.abv || '',
+              dongerRating: beer.dongerRating || '',
+              shawnRating: beer.shawnRating || '',
+              overallRating: beer.overallRating || '',
+              dongerComments: beer.dongerComments || '',
+              shawnComments: beer.shawnComments || '',
             }));
-            setBeerData(beers);
-            setDisplayData(beers);
+      
+            allBeers.push(...beers);
+      
+            nextToken = response.nextToken; // Update nextToken for the next iteration
+          } while (nextToken); // Continue fetching until nextToken is null
+
+          //@ts-ignore
+          allBeers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+          setBeerData(allBeers); // Set all fetched data to state
+          setDisplayData(allBeers); // Set it to the display data state as well
         } catch (error) {
-            console.error('Error fetching beers:', error);
+          console.error('Error fetching beers:', error);
         }
     };
 
@@ -240,9 +258,10 @@ export const BeerTable = () => {
                 >
                     Sign out
                 </Button>
-            <Table
+            <Table //TODO Need to fix the (## here maybe to include ##/{total_number_of_beers})
                 {...collectionProps}
                 wrapLines
+                resizableColumns
                 header={
                     <Header
                         counter={`(${items.length})`}

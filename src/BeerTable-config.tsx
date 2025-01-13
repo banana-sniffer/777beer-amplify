@@ -3,6 +3,7 @@ import { Input } from '@cloudscape-design/components';
 // Define the Beer interface
 export interface BeerData {
     id: string;
+    // TODO need to add the createdAt timestamp here
     name: string;
     parentType: string;
     type: string;
