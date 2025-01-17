@@ -94,3 +94,5 @@ export const BEER_PARENT_TYPES: { [key: string] : string[] } = {
      'Fruit and Field Beer',
      'American Dark Wheat Beer']
 }
+
+export const INVALID_BEER_NAME_MESSAGE = 'Beer name already exists in database!'
