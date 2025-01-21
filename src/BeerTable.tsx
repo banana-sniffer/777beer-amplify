@@ -37,9 +37,11 @@ import {
     SEAN_ID,
     WILL_ID,
     INVALID_BEER_NAME_MESSAGE,
-    BEER_PARENT_TYPES
+    MISSING_BEER_NAME_MESSAGE,
+    BEER_PARENT_TYPES,
 } from './Constants';
 import { getCurrentUser } from 'aws-amplify/auth';
+import { signIn } from "aws-amplify/auth"
 
 const client = generateClient<Schema>();
 
@@ -72,13 +74,13 @@ export const BeerTable = () => {
     });
     const [beerNameSet, setBeerNameSet] = useState(new Set())
     const [brandNameSet, setBrandNameSet] = useState(new Set())
+    const [originSet, setOriginSet] = useState(new Set())
     const { user, signOut } = useAuthenticator();
     const [isAdmin, setIsAdmin] = useState(false);
     const [isBrandon, setIsBrandon] = useState(false);
     const [isSean, setIsSean] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-
-    console.log('newBeer', newBeer)
+    const [willsChoiceCheck, setWillsChoiceCheck] = useState(false);
 
     const columnDefinitions = getEditableColumns(isBrandon, isSean, isAdmin, baseColumnDefinitions)
     const collectionPreferencesProps = getPreferencesProps(columnDefinitions, pageSizePreference)
@@ -134,6 +136,9 @@ export const BeerTable = () => {
         // Create a set of all existing brand names
         setBrandNameSet(new Set(allBeers.map(beer => beer.brand)))
 
+        // Create a set of all existing origins
+        setOriginSet(new Set(allBeers.map(beer => beer.origin)))
+
         // Sort by date first, then by name
         allBeers.sort((a, b) => {
             //@ts-ignore
@@ -186,7 +191,7 @@ export const BeerTable = () => {
                 return updatedSet;
             });
 
-            // Add beer brand to the exist beer set
+            // Add beer brand to the existing beer set
             // @ts-ignore
             if (uploadedData.brand) {
                 setBrandNameSet((prevSet) => {
@@ -197,8 +202,19 @@ export const BeerTable = () => {
                     return updatedSet;
                 });
             }
-            
 
+            // Add beer origin to the existing beer set
+            // @ts-ignore
+            if (uploadedData.origin) {
+                setOriginSet((prevSet) => {
+                    // Create a new Set based on the previous Set
+                    const updatedSet = new Set(prevSet);
+                    // @ts-ignore
+                    updatedSet.add(uploadedData.origin);
+                    return updatedSet;
+                });
+            }
+            
             // Add the added beer to the top of the list
             setBeerData((prevBeerData) => [uploadedData, ...prevBeerData]);
             setDisplayData((prevBeerData) => [uploadedData, ...prevBeerData]);
@@ -330,15 +346,6 @@ export const BeerTable = () => {
         setNewBeer((prev) => ({ ...prev, [field]: value }));
     };
 
-    // const [newBeer, setNewBeer] = useState({
-    //     name: '',
-    //     parentType: '',
-    //     type: '',
-    //     brand: '',
-    //     origin: '',
-    //     abv: '',
-    // });
-
     const generateNewBeerForm = () => {
         const parentTypeOptions = Object.keys(BEER_PARENT_TYPES).map((key) => ({
             label: key,
@@ -352,24 +359,56 @@ export const BeerTable = () => {
                       value: type,
                   }))
                 : [];
-    
+                  
+        // List of Brands
         const brandOptions = Array.from(brandNameSet).map((brand) => ({
             value: brand,
         }));
-    
+
+        // List of Origins
+        const originOptions = Array.from(originSet).map((origin) => ({
+            value: origin,
+        }));
+
+        //@ts-ignore
+        const isFormDisabled = beerNameSet.has(newBeer["name"]) || !newBeer["name"] || !!newBeer["abv"] && isNaN(newBeer["abv"])
+
         return (
             <Form
-
+                actions={
+                    <SpaceBetween direction="horizontal" size="xs">
+                    <Button variant="link" onClick={() => {
+                        setIsAddModalVisible(false); 
+                        setNewBeer({
+                            name: '',
+                            parentType: '',
+                            type: '',
+                            brand: '',
+                            origin: '',
+                            abv: '',
+                        });
+                    }}>
+                        Cancel
+                    </Button>
+                    <Button disabled={isFormDisabled} disabledReason='One or more errors exist in the form!' variant="primary" onClick={addNewBeer}>Add Beer</Button>
+                    </SpaceBetween>
+                }
             >
                 <SpaceBetween direction="vertical" size="l">
                     <FormField
                         label="NAME"
-                        errorText={beerNameSet.has(newBeer["name"]) && INVALID_BEER_NAME_MESSAGE || ""}
+                        errorText={
+                            beerNameSet.has(newBeer["name"])
+                                ? INVALID_BEER_NAME_MESSAGE
+                                : !newBeer["name"]
+                                ? MISSING_BEER_NAME_MESSAGE
+                                : ""
+                        }
                     >
                         <Input
                             value={newBeer["name"]}
                             onChange={({ detail }) => handleInputChange("name", detail.value)}
-                            invalid={beerNameSet.has(newBeer["name"])}
+                            invalid={beerNameSet.has(newBeer["name"]) || !newBeer["name"]}
                             placeholder="Enter beer name"
                             disableBrowserAutocorrect
                         />
@@ -412,25 +451,50 @@ export const BeerTable = () => {
                         <Autosuggest
                             value={newBeer["brand"]}
                             onChange={({ detail }) => handleInputChange("brand", detail.value)}
-                            onSelect={({ detail }) => handleInputChange("brand", detail.value)}
                             // @ts-ignore
                             options={newBeer["brand"].length > 2 ? brandOptions : []}
                             placeholder="Enter or select a brand"
-                            empty="No suggestions found"
+                            empty="No brands found"
                         />
                     </FormField>
+                    <FormField label="ORIGIN">
+                        <Autosuggest
+                            value={newBeer["origin"]}
+                            onChange={({ detail }) => handleInputChange("origin", detail.value)}
+                            // @ts-ignore
+                            options={newBeer["origin"].length > 2 ? originOptions : []}
+                            placeholder="Enter origin"
+                            empty="No origins found"
+                        />
+                    </FormField>
+                    <FormField
+                        label="ABV (%)"
+                        errorText={
+                            // @ts-ignore
+                            !!newBeer["abv"] && isNaN(Number(newBeer["abv"])) 
+                                ? "Please enter a valid ABV (must be a number)." 
+                                : ""
+                        }
+                    >
+                        <Input
+                            value={newBeer["abv"]}
+                            onChange={({ detail }) => handleInputChange("abv", detail.value)}
+                            // @ts-ignore
+                            invalid={!!newBeer["abv"] && isNaN(newBeer["abv"])}
+                            placeholder="Enter ABV (e.g., 5.5)"
+                        />
+                    </FormField>
+                    {/* 
+                        TODO need to add wills choice actually to the actual data and new beer form
+                    */}
                     <Checkbox
-                        // onChange={({ detail }) =>
-                        //     setChecked(detail.checked)
-                        // } https://cloudscape.design/components/checkbox/
-                        checked
+                        onChange={({ detail }) =>
+                            setWillsChoiceCheck(detail.checked)
+                        }
+                        checked={willsChoiceCheck}
                         >
                         Will's Choice
                     </Checkbox>
-                    {/* 
-                        For the origin it's just a text field
-                        for the ABV it just has to be a number
-                    */}
                 </SpaceBetween>
             </Form>
         );
@@ -495,26 +559,7 @@ export const BeerTable = () => {
             <Modal
                 visible={isAddModalVisible}
                 onDismiss={() => setIsAddModalVisible(false)}
-                header="Add New Beer"
-                footer={
-                    // willtai TODO, instead of this use the actual form field full functionality: https://cloudscape.design/components/form/?tabId=playground&example=with-errors
-                    <SpaceBetween direction="horizontal" size="s">
-                        <Button variant="link" onClick={() => {
-                            setIsAddModalVisible(false); 
-                            setNewBeer({
-                                name: '',
-                                parentType: '',
-                                type: '',
-                                brand: '',
-                                origin: '',
-                                abv: '',
-                            });
-                        }}>
-                            Cancel
-                        </Button>
-                        <Button onClick={addNewBeer}>Add Beer</Button>
-                    </SpaceBetween>
-                }
+                header={<Header variant="h1">New Beer Information</Header>}
                 >
                 {generateNewBeerForm()}
             </Modal>
