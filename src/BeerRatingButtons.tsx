@@ -39,7 +39,7 @@ export function BeerRatingButtons({
                 variant={currentView === 'all' ? 'primary' : 'normal'}
                 onClick={onResetBeers}
             >
-                Show All Beers
+                All Beers
             </Button>
         </SpaceBetween>
     );

@@ -23,7 +23,6 @@ import {
     getMatchesCountText,
     paginationLabels,
     getPreferencesProps,
-    pageSizePreference,
     defaultPreferences,
     BeerData,
     baseColumnDefinitions,
@@ -83,7 +82,7 @@ export const BeerTable = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const columnDefinitions = getEditableColumns(isBrandon, isSean, isAdmin, baseColumnDefinitions)
-    const collectionPreferencesProps = getPreferencesProps(columnDefinitions, pageSizePreference)
+    const collectionPreferencesProps = getPreferencesProps(columnDefinitions)
 
     const getUserData = async () => {
         const { userId } = await getCurrentUser();
@@ -123,6 +122,8 @@ export const BeerTable = () => {
               overallRating: beer.overallRating || '',
               dongerComments: beer.dongerComments || '',
               shawnComments: beer.shawnComments || '',
+              willsChoice: beer.willsChoice || false,
+              willsComments: beer.willsComments || '',
             }));
       
             allBeers.push(...beers);
@@ -261,6 +262,7 @@ export const BeerTable = () => {
         setCurrentView('all');
     };
 
+    // TODO: rename this to something better than handleSubmit
     const handleSubmit = async (
         currentItem: BeerData,
         column: TableProps.ColumnDefinition<BeerData>,
@@ -469,7 +471,7 @@ export const BeerTable = () => {
                             value={newBeer["origin"]}
                             onChange={({ detail }) => handleInputChange("origin", detail.value)}
                             // @ts-ignore
-                            options={newBeer["origin"].length > 2 ? originOptions : []}
+                            options={newBeer["origin"].length > 1 ? originOptions : []}
                             placeholder="Enter origin"
                             empty="No origins found"
                         />
@@ -518,7 +520,7 @@ export const BeerTable = () => {
                 resizableColumns
                 header={
                     <Header
-                        counter={`(${items.length})`}
+                        counter={`(${items.length}/${displayData.length})`}
                         actions={
                             <SpaceBetween direction="horizontal" size="xs">
                                 <BeerRatingButtons
@@ -534,7 +536,13 @@ export const BeerTable = () => {
                             </SpaceBetween>
                         }
                     >
-                        {currentView === 'all' ? 'All Beers' : `Top 10 Beers by ${currentView.toUpperCase()}`}
+                        {
+                            currentView === 'overallRating' && 'Overall Top 10' ||
+                            currentView === 'shawnRating' && "Sean's Top 10" ||
+                            currentView === 'dongerRating' && "Brandon's Top 10" ||
+                            currentView === 'willsChoice' && "Will's Choice" ||
+                            'All Beers'
+                        }
                     </Header>
                 }
                 columnDefinitions={columnDefinitions}

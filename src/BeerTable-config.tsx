@@ -15,6 +15,8 @@ export interface BeerData {
     overallRating: number;
     dongerComments: string;
     shawnComments: string;
+    willsChoice: boolean;
+    willsComments: string;
 }
 
 export function getMatchesCountText(count) {
@@ -114,210 +116,13 @@ export const baseColumnDefinitions = [
         cell: (item) => item.shawnComments || "-",
         sortingField: 'shawnComments'
     },
+    { 
+        id: 'willsComments',
+        header: 'Will Comments', 
+        cell: (item) => item.willsComments || "-",
+        sortingField: 'willsComments'
+    },
 ]
-
-const editableColumns = {
-    parentType: {
-        minWidth: 200,
-        editConfig: {
-            ariaLabel: 'Edit Parent Type',
-            errorIconAriaLabel: 'Validation Error',
-            editIconAriaLabel: 'editable',
-            editingCell: (item, { setValue, currentValue }) => {
-                return (
-                    <Input
-                        autoFocus={true}
-                        ariaLabel="Edit Parent Type"
-                        value={currentValue ?? item.parentType}
-                        onChange={event => {
-                            setValue(event.detail.value);
-                        }}
-                        placeholder="Enter parent type"
-                    />
-                );
-            },
-        },
-    },
-    type: {
-        minWidth: 200,
-        editConfig: {
-            ariaLabel: 'Edit Type',
-            errorIconAriaLabel: 'Validation Error',
-            editIconAriaLabel: 'editable',
-            editingCell: (item, { setValue, currentValue }) => {
-                return (
-                    <Input
-                        autoFocus={true}
-                        ariaLabel="Edit Type"
-                        value={currentValue ?? item.type}
-                        onChange={event => {
-                            setValue(event.detail.value);
-                        }}
-                        placeholder="Enter type"
-                    />
-                );
-            },
-        },
-        cell: item => item.type,
-    },
-    brand: {
-        minWidth: 200,
-        editConfig: {
-            ariaLabel: 'Edit Brand',
-            errorIconAriaLabel: 'Validation Error',
-            editIconAriaLabel: 'editable',
-            editingCell: (item, { setValue, currentValue }) => {
-                return (
-                    <Input
-                        autoFocus={true}
-                        ariaLabel="Edit Brand"
-                        value={currentValue ?? item.brand}
-                        onChange={event => {
-                            setValue(event.detail.value);
-                        }}
-                        placeholder="Enter brand"
-                    />
-                );
-            },
-        },
-        cell: item => item.brand,
-    },
-    origin: {
-        minWidth: 200,
-        editConfig: {
-            ariaLabel: 'Edit Origin',
-            errorIconAriaLabel: 'Validation Error',
-            editIconAriaLabel: 'editable',
-            editingCell: (item, { setValue, currentValue }) => {
-                return (
-                    <Input
-                        autoFocus={true}
-                        ariaLabel="Edit Origin"
-                        value={currentValue ?? item.origin}
-                        onChange={event => {
-                            setValue(event.detail.value);
-                        }}
-                        placeholder="Enter origin"
-                    />
-                );
-            },
-        },
-        cell: item => item.origin,
-    },
-    abv: {
-        minWidth: 100,
-        editConfig: {
-            ariaLabel: 'Edit ABV',
-            errorIconAriaLabel: 'Validation Error',
-            editIconAriaLabel: 'editable',
-            editingCell: (item, { setValue, currentValue }) => {
-                return (
-                    <Input
-                        autoFocus={true}
-                        type="number"
-                        ariaLabel="Edit ABV"
-                        value={currentValue ?? item.abv}
-                        onChange={event => {
-                            setValue(parseFloat(event.detail.value) || 0);
-                        }}
-                        placeholder="Enter ABV"
-                    />
-                );
-            },
-        },
-        cell: item => item.abv,
-    },
-    dongerRating: {
-        minWidth: 100,
-        editConfig: {
-            ariaLabel: 'Edit Brandon Rating',
-            errorIconAriaLabel: 'Rating Validation Error',
-            editIconAriaLabel: 'editable',
-            editingCell: (item, { setValue, currentValue }) => {
-                return (
-                    <Input
-                        autoFocus={true}
-                        type="number"
-                        ariaLabel="Edit Brandon rating"
-                        value={currentValue ?? item.dongerRating}
-                        onChange={event => {
-                            setValue(parseFloat(event.detail.value) || 0);
-                        }}
-                        placeholder="Enter rating"
-                    />
-                );
-            },
-        },
-        cell: item => item.dongerRating,
-    },
-    shawnRating: {
-        minWidth: 100,
-        editConfig: {
-            ariaLabel: 'Edit Sean Rating',
-            errorIconAriaLabel: 'Rating Validation Error',
-            editIconAriaLabel: 'editable',
-            editingCell: (item, { setValue, currentValue }) => {
-                return (
-                    <Input
-                        autoFocus={true}
-                        type="number"
-                        ariaLabel="Edit Sean rating"
-                        value={currentValue ?? item.shawnRating}
-                        onChange={event => {
-                            setValue(parseFloat(event.detail.value) || 0);
-                        }}
-                        placeholder="Enter rating"
-                    />
-                );
-            },
-        },
-        cell: item => item.shawnRating,
-    },
-    dongerComments: {
-        minWidth: 200,
-        editConfig: {
-            ariaLabel: 'Edit Brandon Comments',
-            errorIconAriaLabel: 'Comment Validation Error',
-            editIconAriaLabel: 'editable',
-            editingCell: (item, { setValue, currentValue }) => {
-                return (
-                    <Input
-                        autoFocus={true}
-                        ariaLabel="Edit Brandon comments"
-                        value={currentValue ?? item.dongerComments}
-                        onChange={event => {
-                            setValue(event.detail.value);
-                        }}
-                        placeholder="Enter comments"
-                    />
-                );
-            },
-        },
-        cell: item => item.dongerComments,
-    },
-    shawnComments: {
-        minWidth: 200,
-        editConfig: {
-            ariaLabel: 'Edit Sean Comments',
-            errorIconAriaLabel: 'Comment Validation Error',
-            editIconAriaLabel: 'editable',
-            editingCell: (item, { setValue, currentValue }) => {
-                return (
-                    <Input
-                        autoFocus={true}
-                        ariaLabel="Edit Sean comments"
-                        value={currentValue ?? item.shawnComments}
-                        onChange={event => {
-                            setValue(event.detail.value);
-                        }}
-                        placeholder="Enter comments"
-                    />
-                );
-            },
-        },
-        cell: item => item.shawnComments,
-    },
-};
 
 export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinitions) => {
     const editableColumns = {
@@ -567,6 +372,33 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                 },
             },
         },
+        willsComments: {
+            minWidth: 200,
+            editConfig: {
+                ariaLabel: 'Edit Will Comments',
+                errorIconAriaLabel: 'Comment Validation Error',
+                editIconAriaLabel: 'editable',
+                disabledReason: item => {
+                    if (!isAdmin) {
+                        return 'You are not Will!';
+                    }
+                    return undefined;
+                },
+                editingCell: (item, { setValue, currentValue }) => {
+                    return (
+                        <Input
+                            autoFocus={true}
+                            ariaLabel="Edit Will comments"
+                            value={currentValue ?? item.willsComments}
+                            onChange={event => {
+                                setValue(event.detail.value);
+                            }}
+                            placeholder="Enter comments"
+                        />
+                    );
+                },
+            },
+        },
     };
 
     return baseColumnDefinitions.map(column => {
@@ -582,7 +414,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
 
 
 export const defaultPreferences = {
-    pageSize: 20,
+    pageSize: 25,
     contentDisplay: [
         { id: 'createdAt', visible: true },
         { id: 'name', visible: true },
@@ -596,6 +428,7 @@ export const defaultPreferences = {
         { id: 'overallRating', visible: true },
         { id: 'dongerComments', visible: true },
         { id: 'shawnComments', visible: true },
+        { id: 'willsComments', visible: false },
     ],
 }
 
@@ -606,14 +439,16 @@ export const paginationLabels = {
 };
 
 export const pageSizePreference = {
-    title: 'Select page size',
+    title: 'Number of beers to display',
     options: [
         { value: 10, label: '10 beers' },
-        { value: 20, label: '20 beers' },
+        { value: 25, label: '25 beers' },
+        { value: 50, label: '50 beers' },
+        { value: 100, label: '100 beers' },
     ],
 };
 
-export const getPreferencesProps = (columnDefinitions, pageSizePreference) => {
+export const getPreferencesProps = (columnDefinitions) => {
     const contentDisplayPreference = {
         title: 'Column preferences',
         description: 'Customize the columns visibility and order.',
@@ -627,13 +462,10 @@ export const getPreferencesProps = (columnDefinitions, pageSizePreference) => {
     const collectionPreferencesProps = {
         pageSizePreference,
         contentDisplayPreference,
-        cancelLabel: 'Cancel',
+        title: 'Set Beer Table Preferences',
         confirmLabel: 'Confirm',
-        title: 'Preferences',
+        cancelLabel: 'Cancel',
     };
 
-    return {
-        contentDisplayPreference,
-        collectionPreferencesProps
-    };
+    return collectionPreferencesProps
 };
