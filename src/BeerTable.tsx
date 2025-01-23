@@ -71,6 +71,7 @@ export const BeerTable = () => {
         brand: '',
         origin: '',
         abv: '',
+        willsChoice: false,
     });
     const [beerNameSet, setBeerNameSet] = useState(new Set())
     const [brandNameSet, setBrandNameSet] = useState(new Set())
@@ -80,7 +81,6 @@ export const BeerTable = () => {
     const [isBrandon, setIsBrandon] = useState(false);
     const [isSean, setIsSean] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [willsChoiceCheck, setWillsChoiceCheck] = useState(false);
 
     const columnDefinitions = getEditableColumns(isBrandon, isSean, isAdmin, baseColumnDefinitions)
     const collectionPreferencesProps = getPreferencesProps(columnDefinitions, pageSizePreference)
@@ -177,12 +177,14 @@ export const BeerTable = () => {
                 brand: newBeer.brand || '',
                 origin: newBeer.origin || '',
                 abv: newBeer.abv || null,
+                willsChoice: newBeer.willsChoice || false,
             };
 
             // @ts-ignore
             const uploadedData = await client.models.BeerData.create(beerInput);
+            console.log('willtai uploadedData', uploadedData)
 
-            // Add beer to the exist beer set
+            // Add beer to the existing beer name set
             setBeerNameSet((prevSet) => {
                 // Create a new Set based on the previous Set
                 const updatedSet = new Set(prevSet);
@@ -191,7 +193,7 @@ export const BeerTable = () => {
                 return updatedSet;
             });
 
-            // Add beer brand to the existing beer set
+            // Add beer brand to the existing beer brand set
             // @ts-ignore
             if (uploadedData.brand) {
                 setBrandNameSet((prevSet) => {
@@ -203,7 +205,7 @@ export const BeerTable = () => {
                 });
             }
 
-            // Add beer origin to the existing beer set
+            // Add beer origin to the existing beer origin set
             // @ts-ignore
             if (uploadedData.origin) {
                 setOriginSet((prevSet) => {
@@ -216,8 +218,8 @@ export const BeerTable = () => {
             }
             
             // Add the added beer to the top of the list
-            setBeerData((prevBeerData) => [uploadedData, ...prevBeerData]);
-            setDisplayData((prevBeerData) => [uploadedData, ...prevBeerData]);
+            setBeerData((prevBeerData) => [uploadedData.data, ...prevBeerData]);
+            setDisplayData((prevBeerData) => [uploadedData.data, ...prevBeerData]);
             setIsAddModalVisible(false);
             setNewBeer({
                 name: '',
@@ -226,6 +228,7 @@ export const BeerTable = () => {
                 brand: '',
                 origin: '',
                 abv: '',
+                willsChoice: false,
             });
         } catch (error) {
             console.error('Error adding beer:', error);
@@ -241,6 +244,16 @@ export const BeerTable = () => {
 
         setDisplayData(sortedBeers);
         setCurrentView(field);
+    };
+
+    // Get all of wills choice beers
+    const getWillsChoiceBeers = () => {
+        const sortedBeers = [...beerData]
+            .filter(beer => beer.willsChoice);
+            // .filter(beer => beer.name.includes('🚾'));
+    
+        setDisplayData(sortedBeers);
+        setCurrentView('willsChoice');
     };
 
     const resetToAllBeers = () => {
@@ -327,14 +340,7 @@ export const BeerTable = () => {
         {
             filtering: {
                 // @ts-ignore
-                empty: <EmptyState title="No beers :<(" action={<Button>Create instance</Button>} />,
-                noMatch: (
-                    // @ts-ignore
-                    <EmptyState
-                        title="No matches"
-                        action={<Button onClick={() => actions.setFiltering('')}>Clear filter</Button>}
-                    />
-                ),
+                empty: <EmptyState title="Tap Empty :("/>,
             },
             pagination: { pageSize: preferences.pageSize },
             sorting: {},
@@ -386,6 +392,7 @@ export const BeerTable = () => {
                             brand: '',
                             origin: '',
                             abv: '',
+                            willsChoice: false,
                         });
                     }}>
                         Cancel
@@ -484,14 +491,9 @@ export const BeerTable = () => {
                             placeholder="Enter ABV (e.g., 5.5)"
                         />
                     </FormField>
-                    {/* 
-                        TODO need to add wills choice actually to the actual data and new beer form
-                    */}
                     <Checkbox
-                        onChange={({ detail }) =>
-                            setWillsChoiceCheck(detail.checked)
-                        }
-                        checked={willsChoiceCheck}
+                        onChange={({ detail }) => handleInputChange("willsChoice", detail.checked)}
+                        checked={newBeer["willsChoice"]}
                         >
                         Will's Choice
                     </Checkbox>
@@ -524,6 +526,7 @@ export const BeerTable = () => {
                                     onOverallRating={() => getTopBeers('overallRating')}
                                     onBrandonRating={() => getTopBeers('dongerRating')}
                                     onSeanRating={() => getTopBeers('shawnRating')}
+                                    onWillsChoice={() => getWillsChoiceBeers()}
                                     onResetBeers={resetToAllBeers}
                                     currentView={currentView}
                                 />

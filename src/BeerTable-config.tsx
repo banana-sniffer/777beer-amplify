@@ -38,10 +38,10 @@ export const baseColumnDefinitions = [
         isRowHeader: true,
     },
     {
-        // TODO, if item.willsChoice is true then add 🚾 next to it
         id: 'name',
         header: 'Name',
-        cell: (item) => item.name,
+        cell: (item) => 
+            item.willsChoice ? `${item.name} 🚾` : item.name,
         sortingField: 'name',
         ariaLabel: createLabelFunction('name'),
         isRowHeader: true,
