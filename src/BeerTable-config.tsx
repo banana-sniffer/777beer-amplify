@@ -1,4 +1,8 @@
-import { Input } from '@cloudscape-design/components';
+import { 
+    Input,
+    Select,
+} from '@cloudscape-design/components';
+import { BEER_PARENT_TYPES } from './Constants';
 
 // Define the Beer interface
 export interface BeerData {
@@ -139,15 +143,23 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                     return undefined;
                 },
                 editingCell: (item, { setValue, currentValue }) => {
+                    const parentTypeOptions = Object.keys(BEER_PARENT_TYPES).map(key => ({
+                        label: key,
+                        value: key
+                    }));
+
                     return (
-                        <Input
-                            autoFocus={true}
-                            ariaLabel="Edit Parent Type"
-                            value={currentValue ?? item.parentType}
-                            onChange={event => {
-                                setValue(event.detail.value);
+                        <Select
+                            selectedOption={
+                                currentValue 
+                                    ? { label: currentValue, value: currentValue }
+                                    : null
+                            }
+                            onChange={({ detail }) => {
+                                setValue(detail.selectedOption.value);
                             }}
-                            placeholder="Enter parent type"
+                            options={parentTypeOptions}
+                            placeholder={item.parentType || "Select Parent Type"}
                         />
                     );
                 },
@@ -166,15 +178,28 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                     return undefined;
                 },
                 editingCell: (item, { setValue, currentValue }) => {
+                    // Get types based on selected parent type
+                    const parentType = item.parentType;
+                    const typeOptions = parentType 
+                        ? BEER_PARENT_TYPES[parentType].map(type => ({
+                            label: type,
+                            value: type
+                        }))
+                        : [];
+
                     return (
-                        <Input
-                            autoFocus={true}
-                            ariaLabel="Edit Type"
-                            value={currentValue ?? item.type}
-                            onChange={event => {
-                                setValue(event.detail.value);
+                        <Select
+                            selectedOption={
+                                currentValue 
+                                    ? { label: currentValue, value: currentValue }
+                                    : null
+                            }
+                            onChange={({ detail }) => {
+                                setValue(detail.selectedOption.value);
                             }}
-                            placeholder="Enter type"
+                            options={typeOptions}
+                            placeholder={item.type || "Select Type"}
+                            disabled={!parentType}
                         />
                     );
                 },
@@ -235,7 +260,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
             },
         },
         abv: {
-            minWidth: 100,
+            minWidth: 150,
             editConfig: {
                 ariaLabel: 'Edit ABV',
                 errorIconAriaLabel: 'Validation Error',

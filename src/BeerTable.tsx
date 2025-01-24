@@ -186,7 +186,6 @@ export const BeerTable = () => {
 
             // @ts-ignore
             const uploadedData = await client.models.BeerData.create(beerInput);
-            console.log('willtai uploadedData', uploadedData)
 
             // Add beer to the existing beer name set
             setBeerNameSet((prevSet) => {
@@ -254,7 +253,6 @@ export const BeerTable = () => {
     const getWillsChoiceBeers = () => {
         const sortedBeers = [...beerData]
             .filter(beer => beer.willsChoice);
-            // .filter(beer => beer.name.includes('🚾'));
     
         setDisplayData(sortedBeers);
         setCurrentView('willsChoice');
@@ -270,72 +268,79 @@ export const BeerTable = () => {
         currentItem: BeerData,
         column: TableProps.ColumnDefinition<BeerData>,
         value: unknown
-    ) => {
+     ) => {
         if (!column.id) {
             return;
         }
-    
+     
         try {
-            // Prepare the input for the update operation
             const updateInput: Partial<BeerData> = {
                 id: currentItem.id,
                 [column.id]: column.id.includes('Rating') || column.id === 'abv'
-                    ? Number(value) // Ensure numeric fields are numbers
-                    : value as string, // Assume other fields are strings
+                    ? Number(value)
+                    : value as string,
             };
-    
+     
+            // Special handling for parentType to reset type if needed
+            if (column.id === 'parentType') {
+                const newParentType = value as string;
+                updateInput['type'] = BEER_PARENT_TYPES[newParentType]?.includes(currentItem.type) 
+                    ? currentItem.type 
+                    : '';
+            }
+     
+            // Existing numeric validation logic
             if (column.id.includes('Rating') || column.id === 'abv') {
                 let numericValue = updateInput[column.id] as number;
-    
+     
                 if (isNaN(numericValue)) {
                     console.error('Invalid numeric value:', value);
-                    return; // Early exit if the value is not a valid number
+                    return;
                 }
-    
-                // Validate and truncate numeric fields
+     
                 const lowerBound = column.id === 'abv' ? 0 : 0;
                 const upperBound = column.id === 'abv' ? 100 : 10;
-    
+     
                 if (numericValue < lowerBound || numericValue > upperBound) {
                     console.error(
                         `${column.id} value out of bounds (must be between ${lowerBound} and ${upperBound}):`,
                         value
                     );
-                    return; // Early exit if the value is outside the allowed range
+                    return;
                 }
-    
-                numericValue = parseFloat(numericValue.toFixed(1)); // Truncate to one decimal place
+     
+                numericValue = parseFloat(numericValue.toFixed(1));
                 updateInput[column.id] = numericValue;
             }
-    
+     
             // Update in the backend
             // @ts-ignore
             await client.models.BeerData.update(updateInput);
-    
-            // Create the updated beer data
+     
             const updatedBeerData = beerData.map(beer => {
                 if (beer.id === currentItem.id) {
-                    const updatedBeer = { ...beer, [column.id]: updateInput[column.id] };
-    
-                    // Calculate overallRating if both ratings are present
-                    if (updatedBeer.dongerRating != null && updatedBeer.shawnRating != null) {
+                    const updatedBeer = { 
+                        ...beer, 
+                        [column.id]: updateInput[column.id],
+                        ...(updateInput.type !== undefined && { type: updateInput.type })
+                    };
+     
+                    if (updatedBeer.dongerRating && updatedBeer.shawnRating) {
                         updatedBeer.overallRating = 
                             parseFloat(((updatedBeer.dongerRating + updatedBeer.shawnRating) / 2).toFixed(2));
                     }
-    
+     
                     return updatedBeer;
                 }
                 return beer;
             });
-    
-            // Update both states with the new data
+     
             setBeerData(updatedBeerData);
             setDisplayData(updatedBeerData);
         } catch (error) {
             console.error('Error updating beer data:', error);
-            // Optional: Add error handling such as showing a toast notification
         }
-    };    
+     };
 
     const [preferences, setPreferences] = useState(defaultPreferences);
     const { items, actions, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(
