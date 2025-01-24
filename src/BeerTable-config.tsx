@@ -251,10 +251,11 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                         <Input
                             autoFocus={true}
                             type="number"
+                            step="any"
                             ariaLabel="Edit ABV"
                             value={currentValue ?? item.abv}
                             onChange={event => {
-                                setValue(parseFloat(event.detail.value) || 0);
+                                setValue(parseFloat(event.detail.value));
                             }}
                             placeholder="Enter ABV"
                         />
@@ -279,10 +280,11 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                         <Input
                             autoFocus={true}
                             type="number"
+                            step="any"
                             ariaLabel="Edit Brandon rating"
                             value={currentValue ?? item.dongerRating}
                             onChange={event => {
-                                setValue(parseFloat(event.detail.value) || 0);
+                                setValue(parseFloat(event.detail.value));
                             }}
                             placeholder="Enter rating"
                         />
@@ -307,10 +309,11 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                         <Input
                             autoFocus={true}
                             type="number"
+                            step="any"
                             ariaLabel="Edit Sean rating"
                             value={currentValue ?? item.shawnRating}
                             onChange={event => {
-                                setValue(parseFloat(event.detail.value) || 0);
+                                setValue(parseFloat(event.detail.value));
                             }}
                             placeholder="Enter rating"
                         />

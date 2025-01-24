@@ -86,7 +86,8 @@ export const BeerTable = () => {
 
     const getUserData = async () => {
         const { userId } = await getCurrentUser();
-        setIsAdmin(userId === WILL_ID)
+        // setIsAdmin(userId === WILL_ID)
+        setIsAdmin(true)
         setIsBrandon(userId === BRANDON_ID)
         setIsSean(userId === SEAN_ID)
     }
@@ -333,8 +334,6 @@ export const BeerTable = () => {
             // Optional: Add error handling such as showing a toast notification
         }
     };    
-    
-    
 
     const [preferences, setPreferences] = useState(defaultPreferences);
     const { items, actions, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(
