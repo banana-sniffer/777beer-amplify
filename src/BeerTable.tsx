@@ -40,7 +40,7 @@ import {
     BEER_PARENT_TYPES,
 } from './Constants';
 import { getCurrentUser } from 'aws-amplify/auth';
-import { signIn } from "aws-amplify/auth"
+import { useNavigate } from 'react-router-dom';
 
 const client = generateClient<Schema>();
 
@@ -59,6 +59,7 @@ function EmptyState({ title, subtitle, action }) {
 }
 
 export const BeerTable = () => {
+    const navigate = useNavigate();
     const [beerData, setBeerData] = useState([]);
     const [displayData, setDisplayData] = useState([]);
     const [currentView, setCurrentView] = useState('all');
@@ -75,7 +76,7 @@ export const BeerTable = () => {
     const [beerNameSet, setBeerNameSet] = useState(new Set())
     const [brandNameSet, setBrandNameSet] = useState(new Set())
     const [originSet, setOriginSet] = useState(new Set())
-    const { user, signOut } = useAuthenticator();
+    const { signOut, authStatus } = useAuthenticator();
     const [isAdmin, setIsAdmin] = useState(false);
     const [isBrandon, setIsBrandon] = useState(false);
     const [isSean, setIsSean] = useState(false);
@@ -85,16 +86,17 @@ export const BeerTable = () => {
     const collectionPreferencesProps = getPreferencesProps(columnDefinitions)
 
     const getUserData = async () => {
-        const { userId } = await getCurrentUser();
-        // setIsAdmin(userId === WILL_ID)
-        setIsAdmin(true)
-        setIsBrandon(userId === BRANDON_ID)
-        setIsSean(userId === SEAN_ID)
+        if (authStatus === 'authenticated') {
+            const { userId } = await getCurrentUser();
+            setIsAdmin(userId === WILL_ID)
+            setIsBrandon(userId === BRANDON_ID)
+            setIsSean(userId === SEAN_ID)
+        }
     }
 
     useEffect(() => {
         getUserData();
-    }, []);
+    }, [authStatus]);
 
     const fetchBeers = async () => {
         const allBeers = [];
@@ -506,11 +508,12 @@ export const BeerTable = () => {
 
     return (
         <>
-            <Button
-                    onClick={signOut}
-                >
-                    Sign out
-                </Button>
+            {authStatus === 'unauthenticated' && (
+                <Button onClick={() => navigate('/auth')}>Sign In</Button>
+            )}
+            {authStatus === 'authenticated' && (
+                <Button onClick={signOut}>Sign out</Button>
+            )}
             <Table //TODO Need to fix the (## here maybe to include ##/{total_number_of_beers})
                 {...collectionProps}
                 loading={isLoading}
