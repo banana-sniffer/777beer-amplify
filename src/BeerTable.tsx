@@ -539,7 +539,13 @@ export const BeerTable = () => {
                                     onResetBeers={resetToAllBeers}
                                     currentView={currentView}
                                 />
-                                <Button onClick={() => setIsAddModalVisible(true)}>Add New Beer</Button>
+                                <Button
+                                    onClick={() => setIsAddModalVisible(true)}
+                                    disabled={!(isAdmin || isBrandon || isSean)}
+                                    disabledReason="You are not Brandon/Sean!"
+                                >
+                                    Add New Beer
+                                </Button>
                             </SpaceBetween>
                         }
                     >
