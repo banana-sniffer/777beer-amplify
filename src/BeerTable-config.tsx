@@ -1,8 +1,13 @@
 import { 
     Input,
     Select,
+    Textarea,
 } from '@cloudscape-design/components';
-import { BEER_PARENT_TYPES } from './Constants';
+import { 
+    BEER_PARENT_TYPES,
+    TABLE_NUMBER_COLUMN_WIDTH,
+    TABLE_TEXT_AREA_ROWS,
+} from './Constants';
 
 // Define the Beer interface
 export interface BeerData {
@@ -51,6 +56,7 @@ export const baseColumnDefinitions = [
         sortingField: 'name',
         ariaLabel: createLabelFunction('name'),
         isRowHeader: true,
+        width: 150
     },
     { 
         id: 'parentType',
@@ -89,24 +95,25 @@ export const baseColumnDefinitions = [
     },
     { 
         id: 'dongerRating',
-        header: 'Brandon Rating', 
+        header: 'BR', 
         cell: (item) => item.dongerRating || "-",
         ariaLabel: createLabelFunction('dongerRating'),
         sortingField: 'dongerRating'
     },
     { 
         id: 'shawnRating',
-        header: 'Sean Rating', 
+        header: 'SR', 
         cell: (item) => item.shawnRating || "-",
         ariaLabel: createLabelFunction('shawnRating'),
         sortingField: 'shawnRating'
     },
     { 
         id: 'overallRating',
-        header: 'Overall Rating', 
+        header: 'OR', 
         cell: (item) => item.overallRating || "-",
         ariaLabel: createLabelFunction('overallRating'),
-        sortingField: 'overallRating'
+        sortingField: 'overallRating',
+        width: TABLE_NUMBER_COLUMN_WIDTH
     },
     { 
         id: 'dongerComments',
@@ -206,7 +213,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
             },
         },
         brand: {
-            minWidth: 200,
+            width: 150,
             editConfig: {
                 ariaLabel: 'Edit Brand',
                 errorIconAriaLabel: 'Validation Error',
@@ -233,7 +240,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
             },
         },
         origin: {
-            minWidth: 200,
+            width: 150,
             editConfig: {
                 ariaLabel: 'Edit Origin',
                 errorIconAriaLabel: 'Validation Error',
@@ -260,7 +267,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
             },
         },
         abv: {
-            minWidth: 150,
+            width: TABLE_NUMBER_COLUMN_WIDTH,
             editConfig: {
                 ariaLabel: 'Edit ABV',
                 errorIconAriaLabel: 'Validation Error',
@@ -289,7 +296,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
             },
         },
         dongerRating: {
-            minWidth: 100,
+            width: TABLE_NUMBER_COLUMN_WIDTH,
             editConfig: {
                 ariaLabel: 'Edit Brandon Rating',
                 errorIconAriaLabel: 'Rating Validation Error',
@@ -318,7 +325,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
             },
         },
         shawnRating: {
-            minWidth: 100,
+            width: TABLE_NUMBER_COLUMN_WIDTH,
             editConfig: {
                 ariaLabel: 'Edit Sean Rating',
                 errorIconAriaLabel: 'Rating Validation Error',
@@ -347,7 +354,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
             },
         },
         dongerComments: {
-            minWidth: 200,
+            width: 400,
             editConfig: {
                 ariaLabel: 'Edit Brandon Comments',
                 errorIconAriaLabel: 'Comment Validation Error',
@@ -360,7 +367,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                 },
                 editingCell: (item, { setValue, currentValue }) => {
                     return (
-                        <Input
+                        <Textarea
                             autoFocus={true}
                             ariaLabel="Edit Brandon comments"
                             value={currentValue ?? item.dongerComments}
@@ -368,13 +375,14 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                                 setValue(event.detail.value);
                             }}
                             placeholder="Enter comments"
+                            rows={TABLE_TEXT_AREA_ROWS}
                         />
                     );
                 },
             },
         },
         shawnComments: {
-            minWidth: 200,
+            width: 300,
             editConfig: {
                 ariaLabel: 'Edit Sean Comments',
                 errorIconAriaLabel: 'Comment Validation Error',
@@ -387,7 +395,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                 },
                 editingCell: (item, { setValue, currentValue }) => {
                     return (
-                        <Input
+                        <Textarea
                             autoFocus={true}
                             ariaLabel="Edit Sean comments"
                             value={currentValue ?? item.shawnComments}
@@ -395,6 +403,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                                 setValue(event.detail.value);
                             }}
                             placeholder="Enter comments"
+                            rows={TABLE_TEXT_AREA_ROWS}
                         />
                     );
                 },
@@ -414,7 +423,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                 },
                 editingCell: (item, { setValue, currentValue }) => {
                     return (
-                        <Input
+                        <Textarea
                             autoFocus={true}
                             ariaLabel="Edit Will comments"
                             value={currentValue ?? item.willsComments}
@@ -422,6 +431,7 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
                                 setValue(event.detail.value);
                             }}
                             placeholder="Enter comments"
+                            rows={TABLE_TEXT_AREA_ROWS}
                         />
                     );
                 },
@@ -444,10 +454,10 @@ export const getEditableColumns = (isBrandon, isSean, isAdmin, baseColumnDefinit
 export const defaultPreferences = {
     pageSize: 25,
     contentDisplay: [
-        { id: 'createdAt', visible: true },
+        { id: 'createdAt', visible: false },
         { id: 'name', visible: true },
-        { id: 'parentType', visible: true },
-        { id: 'type', visible: true },
+        { id: 'parentType', visible: false },
+        { id: 'type', visible: false },
         { id: 'brand', visible: true },
         { id: 'origin', visible: true },
         { id: 'abv', visible: true },

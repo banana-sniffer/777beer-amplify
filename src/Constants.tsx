@@ -98,3 +98,7 @@ export const BEER_PARENT_TYPES: { [key: string] : string[] } = {
 export const INVALID_BEER_NAME_MESSAGE = 'Beer name already exists in database!'
 
 export const MISSING_BEER_NAME_MESSAGE = "Please enter a new beer name!"
+
+export const TABLE_NUMBER_COLUMN_WIDTH = 100
+
+export const TABLE_TEXT_AREA_ROWS = 7

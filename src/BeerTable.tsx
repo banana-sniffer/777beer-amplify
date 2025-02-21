@@ -519,7 +519,7 @@ export const BeerTable = () => {
             {authStatus === 'authenticated' && (
                 <Button onClick={signOut}>Sign out</Button>
             )}
-            <Table //TODO Need to fix the (## here maybe to include ##/{total_number_of_beers})
+            <Table
                 {...collectionProps}
                 loading={isLoading}
                 loadingText="Pouring beers..."
@@ -579,7 +579,8 @@ export const BeerTable = () => {
                     />
                 }
             />
-
+            
+            {/* New Beer Modal */}
             <Modal
                 visible={isAddModalVisible}
                 onDismiss={() => setIsAddModalVisible(false)}
